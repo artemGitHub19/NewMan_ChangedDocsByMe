@@ -1,0 +1,372 @@
+<!--  Modified by Artem 02.03.2021  -->
+
+<aura:component description="MattPipelineSummary" implements="flexipage:availableForAllPageTypes" controller="MattPipelineSummaryController">
+    
+    <aura:attribute name="showSpinner" type="Boolean" default="true" access="private"/>
+    <aura:attribute name="showReport" type="Boolean" default="false" access="private"/>
+    <aura:attribute name="ownerId" type="Id" access="private"/>
+    <aura:attribute name="reports" type="Map[]" access="private"/>   
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="change" value="{!v.ownerId}" action="{!c.doInit}"/>
+    
+    <lightning:card title="Forecast and Pipeline Summary" iconName="standard:custom_notification">
+        <div class="slds-m-around--medium slds-is-relative">
+            <aura:if isTrue="{!v.showSpinner}">
+                <lightning:spinner variant="brand"/>
+            </aura:if>
+            <span class="slds-text-color_weak slds-text-body_small">Select owner</span>
+            <div style="display: inline-block">
+                <lightning:recordEditForm objectApiName="Opportunity">
+                    <lightning:inputField fieldName="Executive_Sponsor__c" class="no-label" value="{!v.ownerId}"/>
+                </lightning:recordEditForm>
+            </div> 
+        </div>        
+        
+        <div class="slds-m-around--medium slds-is-relative">
+            <aura:if isTrue="{!v.showReport}">
+                
+                <aura:iteration items="{!v.reports}" var="report">
+                    
+                    <div class="slds-m-bottom--small">
+                        {!report.name }&nbsp; (Role: {!report.roleName})
+                    </div>
+                    
+                    <div >
+                        <table class="slds-table slds-table_cell-buffer slds-no-row-hover slds-table_bordered slds-table_col-bordered slds-border--left slds-border--right">
+                            <caption>Forecast</caption>
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate">Booking Commit</div>
+                                    </th>
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate">Booking Best Case</div>
+                                    </th>
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate">New Logo Commit</div>
+                                    </th>
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate">New Logo Best Case</div>
+                                    </th>                           
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="slds-hint-parent"> 
+                                    <td>
+                                        <div class="slds-truncate">
+                                            <lightning:formattedNumber value="{!report.bookingCommit}" style="currency" currencyCode="USD"/>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="slds-truncate">
+                                            <lightning:formattedNumber value="{!report.bookingBestCase}" style="currency" currencyCode="USD"/>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="slds-truncate">{!report.newLogoCommit}</div>
+                                    </td>
+                                    <td>
+                                        <div class="slds-truncate">{!report.newLogoBestCase}</div>
+                                    </td> 
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="slds-m-top--medium">
+                        <table class="slds-table slds-table_cell-buffer slds-no-row-hover slds-table_bordered slds-table_col-bordered slds-border--left slds-border--right">
+                            <caption>Monthly Commits</caption>
+                            <thead>
+                                <tr class="slds-line-height_reset">                            
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate">{!report.firstMonthName}</div>
+                                    </th>
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate">{!report.secondMonthName}</div>
+                                    </th>
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate">{!report.thirdMonthName}</div>
+                                    </th>                            
+                                </tr>
+                            </thead>
+                            <tbody>                       
+                                <tr class="slds-hint-parent">                           
+                                    <td>
+                                        <div class="slds-truncate">
+                                            <lightning:formattedNumber value="{!report.firstMonth}" style="currency" currencyCode="USD"/>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="slds-truncate">
+                                            <lightning:formattedNumber value="{!report.secondMonth}" style="currency" currencyCode="USD"/>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="slds-truncate">
+                                            <lightning:formattedNumber value="{!report.thirdMonth}" style="currency" currencyCode="USD"/>
+                                        </div>
+                                    </td>                           
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="slds-m-top--medium slds-m-bottom--x-large">
+                        <table class="slds-table slds-table_cell-buffer slds-no-row-hover slds-table_bordered slds-table_col-bordered slds-border--left slds-border--right">
+                            <caption>Pipeline</caption>
+                            <thead>
+                                <tr class="slds-line-height_reset">                            
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate"># of Stage 0</div>
+                                    </th>
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate"># of Stage 1</div>
+                                    </th>
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate">Total Stage 2+</div>
+                                    </th>
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate">Mid Stage (3)</div>
+                                    </th>
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate">Late Stage (4-5)</div>
+                                    </th>
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate">% Agile v. Enterprise</div>
+                                    </th>
+                                    <th class="" scope="col">
+                                        <div class="slds-truncate">% New v. Expansion</div>
+                                    </th>                            
+                                </tr>
+                            </thead>
+                            <tbody>                       
+                                <tr class="slds-hint-parent">    
+                                    <td>
+                                        <div class="slds-truncate">{!report.ofStage0}</div>
+                                    </td>
+                                    <td>
+                                        <div class="slds-truncate">{!report.ofStage1}</div>
+                                    </td>
+                                    <td>
+                                        <div class="slds-truncate">
+                                            <lightning:formattedNumber value="{!report.totalStage2Plus}" style="currency" currencyCode="USD"/>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="slds-truncate">
+                                            <lightning:formattedNumber value="{!report.midStagePipeline3}" style="currency" currencyCode="USD"/>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="slds-truncate">
+                                            <lightning:formattedNumber value="{!report.lateStagePipeline4And5}" style="currency" currencyCode="USD"/>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="slds-truncate">{!report.agileVEnterprise}</div>
+                                    </td>
+                                    <td>
+                                        <div class="slds-truncate">{!report.newVExpansion}</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </aura:iteration>                
+            </aura:if>
+        </div> 
+    </lightning:card>
+</aura:component>
+
+
+
+
+<!--  old version
+
+
+<aura:component description="MattPipelineSummary" implements="flexipage:availableForAllPageTypes" controller="MattPipelineSummaryController">
+
+	<aura:attribute name="showSpinner" type="Boolean" default="true" access="private"/>
+	<aura:attribute name="showReport" type="Boolean" default="false" access="private"/>
+	<aura:attribute name="ownerId" type="Id" access="private"/>
+	<aura:attribute name="report" type="Object" access="private"/>
+
+	<aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+	<aura:handler name="change" value="{!v.ownerId}" action="{!c.doInit}"/>
+
+	<lightning:card title="Pipeline Summary" iconName="standard:custom_notification">
+		<div class="slds-m-around-\-medium slds-is-relative">
+			<aura:if isTrue="{!v.showSpinner}">
+				<lightning:spinner variant="brand"/>
+			</aura:if>
+			<span class="slds-text-color_weak slds-text-body_small">Select owner</span>
+			<div style="display: inline-block">
+				<lightning:recordEditForm objectApiName="Opportunity">
+					<lightning:inputField fieldName="Executive_Sponsor__c" class="no-label" value="{!v.ownerId}"/>
+				</lightning:recordEditForm>
+			</div>
+
+			<aura:if isTrue="{!v.showReport}">
+				<div>
+					<table class="slds-table slds-table_cell-buffer slds-no-row-hover slds-table_bordered slds-table_col-bordered slds-border-\-left slds-border-\-right">
+						<thead>
+							<tr class="slds-line-height_reset">
+								<th class="" scope="col">
+									<div class="slds-truncate">Target Account</div>
+								</th>
+								<th class="" scope="col">
+									<div class="slds-truncate">Stage 1 Opps</div>
+								</th>
+								<th class="" scope="col">
+									<div class="slds-truncate">Total Stage 2+ ARR</div>
+								</th>
+								<th class="" scope="col">
+									<div class="slds-truncate">Early Stage ARR</div>
+								</th>
+								<th class="" scope="col">
+									<div class="slds-truncate">Mid-Stage ARR</div>
+								</th>
+								<th class="" scope="col">
+									<div class="slds-truncate">Late Stage ARR</div>
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr class="slds-hint-parent">
+								<td>
+									<div class="slds-truncate">{!v.report.totalTargetAccounts}</div>
+								</td>
+								<td>
+									<div class="slds-truncate">{!v.report.stage1Opps}</div>
+								</td>
+								<td>
+									<div class="slds-truncate">
+										<lightning:formattedNumber value="{!v.report.stagesARR}" style="currency" currencyCode="USD"/>
+									</div>
+								</td>
+								<td>
+									<div class="slds-truncate">
+										<lightning:formattedNumber value="{!v.report.earlyStageARR}" style="currency" currencyCode="USD"/>
+									</div>
+								</td>
+								<td>
+									<div class="slds-truncate">
+										<lightning:formattedNumber value="{!v.report.middleStageARR}" style="currency" currencyCode="USD"/>
+									</div>
+								</td>
+								<td>
+									<div class="slds-truncate">
+										<lightning:formattedNumber value="{!v.report.lateStageARR}" style="currency" currencyCode="USD"/>
+									</div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="slds-m-top-\-medium">
+				<table class="slds-table slds-table_cell-buffer slds-no-row-hover slds-table_bordered slds-table_col-bordered slds-border-\-left slds-border-\-right">
+					<thead>
+						<tr class="slds-line-height_reset">
+							<th class="" scope="col">
+								<div class="slds-truncate"></div>
+							</th>
+							<th class="" scope="col">
+								<div class="slds-truncate">IME Pipeline</div>
+							</th>
+							<th class="" scope="col">
+								<div class="slds-truncate">Program Pipeline</div>
+							</th>
+							<th class="" scope="col">
+								<div class="slds-truncate">Content Pipeline</div>
+							</th>
+							<th class="" scope="col">
+								<div class="slds-truncate">New Logo</div>
+							</th>
+							<th class="" scope="col">
+								<div class="slds-truncate">Upsell</div>
+							</th>
+                            <th class="" scope="col">
+								<div class="slds-truncate">Forecast Best Case</div>
+							</th>
+                            <th class="" scope="col">
+								<div class="slds-truncate">Forecast Commit</div>
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr class="slds-hint-parent">
+							<td>
+								<div class="slds-truncate"># of Opps</div>
+							</td>
+							<td>
+								<div class="slds-truncate">{!v.report.imePipeline}</div>
+							</td>
+							<td>
+								<div class="slds-truncate">{!v.report.programPipeline}</div>
+							</td>
+							<td>
+								<div class="slds-truncate">{!v.report.contentPipeline}</div>
+							</td>
+							<td>
+								<div class="slds-truncate">{!v.report.newLogoCount}</div>
+							</td>
+							<td>
+								<div class="slds-truncate">{!v.report.upsellCount}</div>
+							</td>
+                            <td>
+								<div class="slds-truncate">{!v.report.forecastBestCase}</div>
+							</td>
+                            <td>
+								<div class="slds-truncate">{!v.report.forecastCommit}</div>
+							</td>
+						</tr>
+						<tr class="slds-hint-parent">
+							<td>
+								<div class="slds-truncate">Total ARR</div>
+							</td>
+							<td>
+								<div class="slds-truncate">
+									<lightning:formattedNumber value="{!v.report.imePipelineARR}" style="currency" currencyCode="USD"/>
+								</div>
+							</td>
+							<td>
+								<div class="slds-truncate">
+									<lightning:formattedNumber value="{!v.report.programPipelineARR}" style="currency" currencyCode="USD"/>
+								</div>
+							</td>
+							<td>
+								<div class="slds-truncate">
+									<lightning:formattedNumber value="{!v.report.contentPipelineARR}" style="currency" currencyCode="USD"/>
+								</div>
+							</td>
+							<td>
+								<div class="slds-truncate">
+									<lightning:formattedNumber value="{!v.report.newLogoARR}" style="currency" currencyCode="USD"/>
+								</div>
+							</td>
+							<td>
+								<div class="slds-truncate">
+									<lightning:formattedNumber value="{!v.report.upsellARR}" style="currency" currencyCode="USD"/>
+								</div>
+							</td>
+                            <td>
+								<div class="slds-truncate">
+									<lightning:formattedNumber value="{!v.report.forecastCommitARR}" style="currency" currencyCode="USD"/>
+								</div>
+							</td>
+                            <td>
+								<div class="slds-truncate">
+									<lightning:formattedNumber value="{!v.report.upsellARR}" style="currency" currencyCode="USD"/>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			</aura:if>
+		</div>
+	</lightning:card>
+
+</aura:component>
+
+-->
